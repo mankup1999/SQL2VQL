@@ -1,0 +1,3 @@
+Conditions:
+1) No comments between the declaration of table name and alias.
+2) No JOIN condition present between the tables who also have (+) join condition.

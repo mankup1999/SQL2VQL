@@ -17,15 +17,13 @@ import com.denodo.common.custom.elements.CustomElementsUtil;
 import com.denodo.common.custom.elements.QueryContext;
 import java.lang.*;
 
-@CustomElement(type = CustomElementType.VDPAGGREGATEFUNCTION, name = "COLLECT")
-public class Collect {
+@CustomElement(type = CustomElementType.VDPFUNCTION, name = "TO_NUMBER")
+public class To_Number1 {
      @CustomExecutor(implementation = true, delegationPatterns = {
             @DelegationPattern(databaseName = "oracle",
-                                databaseVersions = { "10g", "11g" },
-                                pattern = "CAST(COLLECT($0[,$i]{1,n}) as $1)") })
-     public Double collect(
-			@CustomGroup(name = "field2", groupType = String.class)
-            CustomGroupValue<String>... textField, 
+                                databaseVersions = { "10g", "11g","12c","8i","9i"},
+                                pattern = "TO_NUMBER($0)") })
+     public Double To_Number1 (
              @CustomParam(name = "arg0") String arg0) {
 
          /*

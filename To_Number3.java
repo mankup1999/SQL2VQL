@@ -17,16 +17,17 @@ import com.denodo.common.custom.elements.CustomElementsUtil;
 import com.denodo.common.custom.elements.QueryContext;
 import java.lang.*;
 
-@CustomElement(type = CustomElementType.VDPAGGREGATEFUNCTION, name = "COLLECT")
-public class Collect {
-     @CustomExecutor(implementation = true, delegationPatterns = {
+@CustomElement(type = CustomElementType.VDPFUNCTION, name = "TO_NUMBER")
+public class To_Number3 {
+	 
+	 @CustomExecutor(implementation = true, delegationPatterns = {
             @DelegationPattern(databaseName = "oracle",
-                                databaseVersions = { "10g", "11g" },
-                                pattern = "CAST(COLLECT($0[,$i]{1,n}) as $1)") })
-     public Double collect(
-			@CustomGroup(name = "field2", groupType = String.class)
-            CustomGroupValue<String>... textField, 
-             @CustomParam(name = "arg0") String arg0) {
+                                databaseVersions = { "10g", "11g","12c","8i","9i"},
+                                pattern = "TO_NUMBER($0,$1,$2)") })
+     public Double To_Number3 (
+             @CustomParam(name = "arg0") String arg0,
+			 @CustomParam(name = "arg1") String arg1,
+			 @CustomParam(name = "arg2") String arg2) {
 
          /*
          * If the function is not delegated to any of the databases above (e.g. if you use it on a query to

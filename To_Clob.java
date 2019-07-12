@@ -17,16 +17,15 @@ import com.denodo.common.custom.elements.CustomElementsUtil;
 import com.denodo.common.custom.elements.QueryContext;
 import java.lang.*;
 
-@CustomElement(type = CustomElementType.VDPAGGREGATEFUNCTION, name = "COLLECT")
-public class Collect {
+@CustomElement(type = CustomElementType.VDPAGGREGATEFUNCTION, name = "TO_CLOB_AGG_ORACLE")
+public class To_Clob {
      @CustomExecutor(implementation = true, delegationPatterns = {
             @DelegationPattern(databaseName = "oracle",
                                 databaseVersions = { "10g", "11g" },
-                                pattern = "CAST(COLLECT($0[,$i]{1,n}) as $1)") })
-     public Double collect(
-			@CustomGroup(name = "field2", groupType = String.class)
-            CustomGroupValue<String>... textField, 
-             @CustomParam(name = "arg0") String arg0) {
+                                pattern = "TO_CLOB($0)") })
+     public String... TO_CLOB_AGG_ORACLE (
+             @CustomGroup(name = "field", groupType = String.class)
+            CustomGroupValue<String>... textField){
 
          /*
          * If the function is not delegated to any of the databases above (e.g. if you use it on a query to
@@ -34,4 +33,18 @@ public class Collect {
          */
 		 return null;
      }
+	 @CustomExecutor(implementation = true, delegationPatterns = {
+            @DelegationPattern(databaseName = "oracle",
+                                databaseVersions = { "10g", "11g" },
+                                pattern = "TO_CLOB($0)") })
+     public String... TO_CLOB_AGG_ORACLE (
+             @CustomParam(name = "arg0") String arg0)){
+
+         /*
+         * If the function is not delegated to any of the databases above (e.g. if you use it on a query to
+         * base view from Teradata), the execution engine executes this code.
+         */
+		 return null;
+     }
+	 
 }

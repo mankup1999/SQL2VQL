@@ -1,0 +1,310 @@
+select   a.*        , count(1) as vol from ( select   c.*
+, case when team in ('04-Telesales - Inbound','05-Telesales - Outbound') then '04-Telesales'
+when team in ('06-Event (Outsource)','07-Event (In-House)','08-D2D (Outsource)',
+'09-D2D (In-House)','09-D2D (In-house)') then '05-Direct Sales'
+when team like ('10-DH-Telesales') then '06-DH-Telesales'  when team in ('11-Cust Care','12-Others') then
+'07-Others'               else TEAM               end as TEAM_GRP 
+from (select        to_date(ORD_ACTN_STRT_DATE_KEY,'YYYYMMDD'
+) as oed_date      , substr(to_char(to_date(ORD_ACTN_STRT_DATE_KEY,
+'YYYYMMDD'),'Day'),1,3) as oed_day      , week_strt_dt      ,
+cast((case when trim(to_char(to_date(ORD_ACTN_STRT_DATE_KEY,'yyyymmdd'),'Day'))
+ in ('Saturday','Sunday') then 'Y' else 'N' end)
+as varchar2(7)) as weekend      , case when (main_prod_offr_ds
+like '%50M%' or main_prod_offr_ds like '50M%') then 'Fibre 50M'
+when (main_prod_offr_ds like '%500M%' or main_prod_offr_ds like '500M%') 
+then 'Fibre 500M'               when main_prod_offr_ds like '10G%' then 'Fibre 10Gbps'              
+ when
+(main_prod_offr_ds like '1G%' and upper(main_prod_offr_ds) like
+'%MESH%') then 'Fibre 1Gbps w Wifi Mesh'               when main_prod_offr_ds like '1G%' then 'Fibre 1Gbps'
+               when
+main_prod_offr_ds like '2G%' then 'Fibre 2Gbps'               when main_prod_offr_ds like '1x1%' then 'Fibre 1x1Gbps'
+when main_prod_offr_ds like '300M%' then 'Fibre 300M'
+when main_prod_offr_ds like 'Mio Home%' then 'Mio Home'
+when main_prod_offr_ds like 'Singtel Home Broadban
+d' then 'Standalone'               else ''               end as
+plan_grp_2       , main_prod_offr_ds as plan_grp       , 'GrossAdd' as driver       ,
+ CAST('' AS varchar2(8)) as port_ind
+, '01)R' as seg_grp       , ORD_ACTN_STTS_DS       , DEAL_ID as
+DEALER_CODE       /*, EMPL_OR_SSMN_CD as SALESMAN_CODE       , c
+ase when b.deal_id in ('D3006', 'D3007', 'D3008', 'D3009') then
+''               else d.vndr_nm end as VENDOR_NAME        , case
+when b.deal_id in ('D3006', 'D3007', 'D3008', 'D3009') then ''
+else d.dealer_nm end as DEALER_NAME*/        , cas
+e when b.deal_id in ('D3006', 'D3007', 'D3008', 'D3009') then e.vndr_cd                    
+ when d.team in ('01-Retail','02-Channels','03-Eshop',
+'04-Telesales - Inbound','05-Telesales - Outbound',
+'06-Event (Outsource)','07-Event (In-House)','08-D2D (Outsource)',
+'09-D2D (In-House)','09-D2D (In-house)','10-DH-Telesales',
+'11-Cust Care') then d.shop_nm                     else '' end as 
+SHOP_NAME        , case when b.deal_id in ('D3006', 'D3007', '
+D3008', 'D3009') then e.TEAM                   when d.team in 
+('01-Retail','02-Channels','03-Eshop','04-Telesales - Inbound','05-Telesales - Outbound',
+'06-Event (Outsource)','07-Event (In-House)',
+'08-D2D (Outsource)','09-D2D (In-House)','09-D2D (In-house)'
+,'10-DH-Telesales','11-Cust Care') then d.team
+else '12-Others' end as TEAM from ( select a.*, h.week_strt_dt
+from       (SELECT DISTINCT ORD_TRAN.ORD_ACTN_ID        AS ORD_ACTN_ID ,                
+ ORD_TRAN.ORD_ID             AS ORDER_ID,
+                 ORD_TRAN.DEAL_ID,                 ORD_TRAN.DEAL_NM,                 
+ORD_TRAN.VNDR_ID,                 ORD_TRAN.VNDR_NM,                 SUBS.ACCS_LKGE_ID,                 ORD_TRAN.CUST_RQST_TS,                 SUBS.BB_USER_NM,
+EMPL.EMPL_OR_SSMN_CD,                 ORD_TRAN.ORD_ACTN_STRT_TS   AS ORD_ACTN_STRT_TS ,                 ORD_TRAN.ORD_ACTN_
+STRT_DATE_KEY,                 ORD_TRAN.MAIN_CMPN_NM,
+ASSG_CMPN_OFFR.PROD_DS CMPN_PROD_DS,                 ASSG_BILL_OFFR.BILL_OFFR_DS BILL_OFFR_DS,                 ASSG_BILL_OFFR.BASE_PLAN_IND,                 CUST.CUST_ID,
+CTCT.IDNT_DOC_1_NO          AS CUST_CTCT_IDNT_DOC_1_NO ,
+CTCT.FRST_NM,                 SUBS.PRIM_RSRC_VALU_TXT
+AS PRIM_RSRC_VALU_TXT ,                 ORD_TRAN.SERV_TYPE_CD       AS SERV_TYPE_CD,                 
+ORD_TRAN.ORD_ACTN_DONE_TS   AS ORD_ACTN_DONE_TS ,                 
+ORD_TRAN.ORD_ACTN_DONE_DATE_KEY,                 
+ORD_TRAN.ORD_TRAN_YEAR_MNTH_NO,
+SUBS.SUBS_ID                AS SUBS_ID ,
+OA_STTS.ORD_ACTN_STTS_DS    as ORD_ACTN_STTS_DS ,
+ASSG_PROD_STAT.ASSG_PROD_STAT_ID,                 OA_TYPE.ORD_ACTN_TYPE_DS    AS ORD_ACTN_TYPE_DS ,
+                 OA_RSN.ORD_ACTN_RSN_DS      AS ORD_ACTN_RSN_DS ,                 ORD_TRAN.ASSG_PROD_ID       AS ASSG_PROD_ID , 
+                ORD_TRAN.MAIN_CMPN_ID,                 ORD_TRAN.ASSG_PRCE_PLAN_ID  as
+ASSG_PRCE_PLAN_ID,                 PROD_OFFR.PROD_DS AS MAIN_PROD_OFFR_DS,                 ASSG_BILL_OFFR.BILL_OFFR_ID 
+-- added to populate config table 
+FROM EP_REL.ORD_TRAN, (SELECT SUBS_KEY,
+BB_USER_NM,ACCS_LKGE_ID,SUBS_ID,PRIM_RSRC_VALU_TXT,OPEN_TS,CLSE_TS,
+MAIN_PROD_OFFR_DS FROM EP_REL.SUBS           WHERE  ECF_DELT_FLG = 0  )  SUBS, 
+(SELECT ORD_ACTN_STTS_KEY,ORD_ACTN_STTS_DS,OPEN_TS,
+CLSE_TS                                            FROM EP_REL.ORD_ACTN_STTS  WHERE  ECF_DELT_FLG = 0  )  OA_STTS,
+ (SELECT
+ORD_ACTN_TYPE_KEY,ORD_ACTN_TYPE_DS,ORD_ACTN_TYPE_ID,OPEN_TS,CLSE_TS                           
+FROM EP_REL.ORD_ACTN_TYPE  WHERE
+ECF_DELT_FLG = 0  )  OA_TYPE, 
+(SELECT ORD_ACTN_RSN_KEY,ORD_ACTN_RSN_DS,ORD_ACTN_RSN_ID,OPEN_TS,CLSE_TS
+FROM EP_REL.ORD_ACTN_RSN   WHERE  ECF_DELT_FLG = 0  )  OA_RSN, 
+(SELECT CTCT_KEY,IDNT_DOC_1_NO,OPEN_TS,CLSE_TS,FRST_NM
+FROM EP_REL.CTCT
+WHERE  ECF_DELT_FLG = 0  ) CTCT, (SELECT CUST_KEY,CUST_ID,OPEN_TS,CLSE_TS
+FROM EP_REL.CUST           WHERE  ECF_DELT_FLG = 0  )
+CUST, (SELECT BASE_PLAN_IND,OPEN_TS,CLSE_TS,BILL_OFFR_KEY,BILL_OFFR_DS,BILL_OFFR_ID                         
+FROM EP_REL.BILL_OFFR      WHERE  ECF_DELT_FLG = 0  ) ASSG_BILL_OFFR,
+ (SELECT PROD_CTLG_ITEM_ID,PROD_CTLG_KEY, PROD_DS,OPEN_TS,CLSE_TS
+FROM EP_REL.PROD_CTLG      WHERE  ECF_D
+ELT_FLG = 0  ) ASSG_CMPN_OFFR, (SELECT EMPL_OR_SSMN_CD,OPEN_TS,CLSE_TS,EMPL_KEY
+FROM EP_REL.EMPL           WHERE ECF_DELT_FLG = 0) EMPL, 
+(SELECT ASSG_PROD_STAT_ID,OPEN_TS,CLSE_TS,ASSG_PROD_STAT_KEY
+FROM EP_REL.ASSG_PROD_STAT WHERE  ECF_DELT_FLG = 0  ) ASSG_PROD_STAT, (select PROD_DS , PROD_cTLG_KEY
+FROM EP_REL.PROD_CTLG      WHERE ECF_DELT_FLG=0
+AND ECF_XPIR_TS='31-DEC-9999') PROD_OFFR WHERE  ORD_TRAN.SUBS_KEY                
+= SUBS.SUBS_KEY (+)   AND ORD_TRAN.BILL_OFFR_KEY      
+= ASSG_BILL_OFFR.BILL_OFFR_KEY (+)   AND ORD_TRAN.PROD_CTLG_KEY      = ASSG_CMPN_OFFR.PROD_CTLG_KEY (+)
+   AND ORD_TRAN.ORD_ACTN_STTS_KEY  = OA_STTS.ORD_ACTN_STTS_KEY (+)   AND ORD_TRAN.ORD_ACTN_TYPE_KEY  = OA_TYPE.ORD_ACTN_TYPE_KEY (+)  
+ AND ORD_TRAN.ORD_ACTN_RSN_KEY   = OA_RSN.ORD_ACTN_RSN_KEY (+)   AND ORD_TRAN.MAIN_CTCT_KEY      = CTCT.CTCT_KEY(+)   AND ORD_TRAN.CUST_KEY
+= CUST.CUST_KEY(+)   AND ORD_TRAN.ASSG_PROD_STAT_KEY =
+ASSG_PROD_STAT.ASSG_PROD_STAT_KEY(+)   AND ORD_TRAN.CRTE_EMPL_KEY      = EMPL.EMPL_KEY(+)   AND
+ ORD_TRAN.MAIN_PROD_OFFR_KEY =PROD_OFFR.PROD_CTLG_KEY (+)   AND ORD_TRAN.OPEN_TS            >=
+ SUBS.OPEN_TS (+)   and ORD_TRAN.OPEN_TS            < SUBS.CLSE_TS(+)   AND ORD_TRAN.OPEN_TS            >= OA_STTS.OPEN_TS (+)
+AND ORD_TRAN.OPEN_TS            < OA_STTS.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= OA_TYPE.OPEN_TS (+)   
+AND ORD_TRAN.OPEN_TS            < OA_TYPE.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= OA_RSN.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< OA_RSN.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= CTCT.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < CTCT.CLSE_TS (+)
+AND ORD_TRAN.OPEN_TS            >= CUST.OPEN_TS (+)   and ORD_TRAN.OPEN_TS            < CUST.CLSE_TS (+)   AND
+ ORD_TRAN.OPEN_TS            >= ASSG_BILL_OFFR.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < ASSG_BILL_OFFR.CLSE_TS (+)  
+ AND ORD_TRAN.OPEN_TS            >= ASSG_CMPN_OFFR.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < ASSG_CMPN_OFFR.CLSE_TS (+)
+   AND ORD_TRAN.OPEN_TS
+>= ASSG_PROD_STAT.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< ASSG_PROD_STAT.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= EMPL.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< EMPL.CLSE_TS (+)   AND UPPER(ORD_TRAN.MAIN_CMPN_NM) IN ('BROADBAND MAIN')
+   AND UPPER(OA_TYPE.ORD_ACTN_TYPE_DS) IN ( 'PROVIDE' )   AND ORD_TRAN.MAIN_CTCT_KEY <> -1   AND UPPER(CTCT.FRST_NM)
+NOT LIKE 'BRT%'   AND ORD_TRAN.ECF_DELT_FLG = 0   AND ASSG_CMPN_OFFR.PROD_CTLG_ITEM_ID = '8623942'   AND ASSG_PRCE_PLAN_ID <> -1   ) a  left join biz_ba.cfg_week_edw h             on   a.ord_
+actn_strt_date_key = h.tm_perd_id where ord_actn_stts_ds in (/*'
+Negotiation',*/ 'Delivery', 'Done', 'Completion') -- removed 'Ne
+gotiation' on 19-Mar-18 after aligning with XY   and cmpn_prod_d
+s = 'Broadband Plan'   and bill_offr_ds is NOT NULL   and BASE_P
+LAN_IND = 'Y'   and CUST_CTCT_IDNT_DOC_1_NO is NOT NULL   and CU
+ST_ID is NOT NULL   and ASSG_PROD_STAT_ID is NOT NULL   and ORD_
+ACTN_STRT_DATE_KEY between to_number(to_char(trunc(sysdate-15),'
+YYYYMMDD')) and to_number(to_char((sysdate-1),'YYYYMMDD'))) b le
+ft join biz_ba.CFG_DEALER_CHANNEL d             on  b.deal_id =
+d.dealer_cd  left join ( select DEALER_CD, bcc_login, shop_deale
+r_code, team, roadshow, DEALER_CD || bcc_login as unique_key, vn
+dr_cd, road_show_strt, road_show_end   from BIZ_BA.CFG_ROADSHOW_
+DEALER_CHANNEL   ) e on b.DEAL_ID = e.DEALER_CD and upper(b.EMPL
+_OR_SSMN_CD) = upper(e.bcc_login) and b.ORD_ACTN_STRT_DATE_KEY b
+etween e.road_show_strt and e.road_show_end union all select
+to_date(ORD_ACTN_STRT_DATE_KEY,'YYYYMMDD') as oed_date
+, substr(to_char(to_date(ORD_ACTN_STRT_DATE_KEY,'YYYYMMDD'),'Day
+'),1,3) as oed_day      , week_strt_dt      , cast((case when tr
+im(to_char(to_date(ORD_ACTN_STRT_DATE_KEY,'yyyymmdd'),'Day')) in
+('Saturday','Sunday') then 'Y' else 'N' end) as varchar2(7)) as
+weekend      , case when (main_prod_offr_ds like '%50M%' or mai
+n_prod_offr_ds like '50M%') then 'Fibre 50M'               when
+(main_prod_offr_ds like '%500M%' or main_prod_offr_ds like '500M
+%') then 'Fibre 500M'               when main_prod_offr_ds like
+'10G%' then 'Fibre 10Gbps'               when (main_prod_offr_ds
+like '1G%' and upper(main_prod_offr_ds) like '%MESH%') then 'Fi
+bre 1Gbps w Wifi Mesh'               when main_prod_offr_ds like
+'1G%' then 'Fibre 1Gbps'               when main_prod_offr_ds l
+ike '2G%' then 'Fibre 2Gbps'               when main_prod_offr_d
+s like '1x1%' then 'Fibre 1x1Gbps'               when main_prod_
+offr_ds like '300M%' then 'Fibre 300M'               when main_p
+rod_offr_ds like 'Mio Home%' then 'Mio Home'               when
+main_prod_offr_ds like 'Singtel Home Broadband' then 'Standalone
+'               else ''               end as plan_grp_2       ,
+main_prod_offr_ds as plan_grp       , case when ordrtype_ind lik
+e '1. ADSL to Fibre' then 'Migr'               when UPPER(ORD_AC
+TN_RSN_DS) in ('RECONTRACTING') then 'Recon'               else
+'Change Offer' end driver       , CAST('' AS varchar2(8)) as por
+t_ind       , '01)R' as seg_grp       , ORD_ACTN_STTS_DS       ,
+DEAL_ID as DEALER_CODE       /*, EMPL_OR_SSMN_CD as SALESMAN_CO
+DE       , case when b.deal_id in ('D3006', 'D3007', 'D3008', 'D
+3009') then ''              else d.vndr_nm end as VENDOR_NAME
+, case when b.deal_id in ('D3006', 'D3007', 'D3008', 'D3009
+') then ''               else d.dealer_nm end as DEALER_NAME*/
+, case when b.deal_id in ('D3006', 'D3007', 'D3008', 'D300
+9') then e.vndr_cd                     when d.team in ('01-Retai
+l','02-Channels','03-Eshop','04-Telesales - Inbound','05-Telesal
+es - Outbound','06-Event (Outsource)','07-Event (In-House)','08-
+D2D (Outsource)','09-D2D (In-House)','09-D2D (In-house)','10-DH-
+Telesales','11-Cust Care') then d.shop_nm                     el
+se '' end as SHOP_NAME        , case when b.deal_id in ('D3006',
+'D3007', 'D3008', 'D3009') then e.TEAM                   when d
+.team in ('01-Retail','02-Channels','03-Eshop','04-Telesales - I
+nbound','05-Telesales - Outbound','06-Event (Outsource)','07-Eve
+nt (In-House)','08-D2D (Outsource)','09-D2D (In-House)','09-D2D
+(In-house)','10-DH-Telesales','11-Cust Care') then d.team
+else '12-Others' end as TEAM from ( select   a.*
+, h.week_strt_dt               , case when (upper(f.P
+RICE_PLAN) like 'MIO HOME%' or upper(f.PRICE_PLAN) like 'SINGTEL
+HOME BROADBAND') -- have checked that the case when is done cor
+rectly                 and (upper(a.MAIN_PROD_OFFR_DS) not like
+'MIO HOME%' and upper(a.MAIN_PROD_OFFR_DS) not like 'SINGTEL HOM
+E BROADBAND') then '1. ADSL to Fibre'                when (upper
+(f.PRICE_PLAN) not like 'MIO HOME%' and upper(f.PRICE_PLAN) not
+like 'SINGTEL HOME BROADBAND')                 and (upper(a.MAIN
+_PROD_OFFR_DS) not like 'MIO HOME%' and upper(a.MAIN_PROD_OFFR_D
+S) not like 'SINGTEL HOME BROADBAND') then '2. Fibre to Fibre'
+when (upper(f.PRICE_PLAN) like 'MIO HOME%' or uppe
+r(f.PRICE_PLAN) like 'SINGTEL HOME BROADBAND')                 a
+nd (upper(a.MAIN_PROD_OFFR_DS) like 'MIO HOME%' or upper(a.MAIN_
+PROD_OFFR_DS) like 'SINGTEL HOME BROADBAND') then '3. ADSL to AD
+SL'                when (upper(f.PRICE_PLAN) not like 'MIO HOME%
+' and upper(f.PRICE_PLAN) not like 'SINGTEL HOME BROADBAND')
+and (upper(a.MAIN_PROD_OFFR_DS) like 'MIO HOME%' or
+upper(a.MAIN_PROD_OFFR_DS) like 'SINGTEL HOME BROADBAND') then
+'4. Fibre to ADSL'                end ordrtype_ind from (SELECT
+DISTINCT ORD_TRAN.ORD_ACTN_ID        AS ORD_ACTN_ID ,
+ORD_TRAN.ORD_ID             AS ORDER_ID,                 O
+RD_TRAN.DEAL_ID,                 ORD_TRAN.DEAL_NM,
+ORD_TRAN.VNDR_ID,                 ORD_TRAN.VNDR_NM,
+ORD_TRAN.CUST_RQST_TS,                 SUBS.BB_USER_NM,
+SUBS.ACCS_LKGE_ID,                 EMPL.EMPL_OR_S
+SMN_CD,                 ORD_TRAN.ORD_ACTN_STRT_TS   AS ORD_ACTN_
+STRT_TS ,                 ORD_TRAN.ORD_ACTN_STRT_DATE_KEY,
+ORD_TRAN.MAIN_CMPN_NM,                 ASSG_CMPN_OFFR
+.PROD_DS CMPN_PROD_DS,                 ASSG_BILL_OFFR.BILL_OFFR_
+DS BILL_OFFR_DS,                 ASSG_BILL_OFFR.BASE_PLAN_IND,
+CUST.CUST_ID,                 CTCT.IDNT_DOC_1_NO
+AS CUST_CTCT_IDNT_DOC_1_NO ,                 CTCT.FRST_
+NM,                 SUBS.PRIM_RSRC_VALU_TXT     AS PRIM_RSRC_VAL
+U_TXT ,                 ORD_TRAN.SERV_TYPE_CD       AS SERV_TYPE
+_CD,                 ORD_TRAN.ORD_ACTN_DONE_TS   AS ORD_ACTN_DON
+E_TS ,                 ORD_TRAN.ORD_ACTN_DONE_DATE_KEY,
+ORD_TRAN.ORD_TRAN_YEAR_MNTH_NO,                 SUBS.SUB
+S_ID                AS SUBS_ID ,                 OA_STTS.ORD_ACT
+N_STTS_DS    as ORD_ACTN_STTS_DS ,                 ASSG_PROD_STA
+T.ASSG_PROD_STAT_ID,                 OA_TYPE.ORD_ACTN_TYPE_DS
+AS ORD_ACTN_TYPE_DS ,                 OA_RSN.ORD_ACTN_RSN_DS
+AS ORD_ACTN_RSN_DS ,                 ORD_TRAN.ASSG_PROD_ID
+AS ASSG_PROD_ID ,                 ORD_TRAN.MAIN_CMPN_ID,
+ORD_TRAN.ASSG_PRCE_PLAN_ID  AS ASSG_PRCE_PLAN_ID,
+PROD_OFFR.PROD_DS           AS MAIN_PROD_OFFR_DS,
+AP_CLSS.SERV_TECH_NM        AS MAIN_PROD_OFFR_CLSS_
+DS,             AP_PREV_CLSS.SERV_TECH_NM   AS PREV_MAIN_PROD_OF
+FR_CLSS_DS,                 ASSG_BILL_OFFR.BILL_OFFR_ID -- added
+to populate config table FROM EP_REL.ORD_TRAN, (SELECT SUBS_KEY
+,ACCS_LKGE_ID,SUBS_ID,BB_USER_NM,PRIM_RSRC_VALU_TXT,OPEN_TS,CLSE
+_TS,MAIN_PROD_OFFR_CLSS_DS,PREV_MAIN_PROD_OFFR_CLSS_DS,MAIN_PROD
+_OFFR_DS,PREV_MAIN_PROD_OFFR_DS FROM EP_REL.SUBS WHERE  ECF_DELT
+_FLG = 0  )  SUBS, (SELECT ORD_ACTN_STTS_KEY,ORD_ACTN_STTS_DS,OP
+EN_TS,CLSE_TS FROM EP_REL.ORD_ACTN_STTS  WHERE  ECF_DELT_FLG = 0
+)  OA_STTS, (SELECT ORD_ACTN_TYPE_KEY,ORD_ACTN_TYPE_DS,ORD_ACT
+N_TYPE_ID,OPEN_TS,CLSE_TS FROM EP_REL.ORD_ACTN_TYPE  WHERE  ECF_
+DELT_FLG = 0  )  OA_TYPE, (SELECT ORD_ACTN_RSN_KEY,ORD_ACTN_RSN_
+DS,ORD_ACTN_RSN_ID,OPEN_TS,CLSE_TS FROM EP_REL.ORD_ACTN_RSN  WHE
+RE  ECF_DELT_FLG = 0  )  OA_RSN, (SELECT CTCT_KEY,IDNT_DOC_1_NO,
+OPEN_TS,CLSE_TS,FRST_NM FROM EP_REL.CTCT WHERE  ECF_DELT_FLG = 0
+) CTCT, (SELECT CUST_KEY,CUST_ID,OPEN_TS,CLSE_TS FROM EP_REL.C
+UST WHERE  ECF_DELT_FLG = 0  ) CUST, (SELECT BASE_PLAN_IND,OPEN_
+TS,CLSE_TS,BILL_OFFR_KEY,BILL_OFFR_DS,BILL_OFFR_ID  FROM EP_REL.
+BILL_OFFR WHERE  ECF_DELT_FLG = 0  ) ASSG_BILL_OFFR, (SELECT PRO
+D_CTLG_ITEM_ID,PROD_CTLG_KEY, PROD_DS,OPEN_TS,CLSE_TS FROM EP_RE
+L.PROD_CTLG WHERE  ECF_DELT_FLG = 0  ) ASSG_CMPN_OFFR, (SELECT E
+MPL_OR_SSMN_CD,OPEN_TS,CLSE_TS,EMPL_KEY from EP_REL.EMPL  where
+ECF_DELT_FLG = 0) EMPL, (SELECT ASSG_PROD_STAT_ID,OPEN_TS,CLSE_T
+S,ASSG_PROD_STAT_KEY FROM EP_REL.ASSG_PROD_STAT WHERE  ECF_DELT_
+FLG = 0  ) ASSG_PROD_STAT, (select PROD_DS , PROD_cTLG_KEY FROM
+EP_REL.PROD_CTLG WHERE ECF_DELT_FLG=0 AND ECF_XPIR_TS='31-DEC-99
+99') PROD_OFFR, (SELECT ASSG_PROD_ID,SERV_TECH_NM FROM ( select
+ASSG_PROD_ID,SERV_TECH_NM, rank() over ( partition by assg_prod_
+id order by strt_ts desc,end_ts desc,assg_prod_vrsn_id desc) as
+RANK FROM EP_REL.ASSG_PROD AP WHERE AP.ECF_XPIR_TS='31-dec-9999'
+AND AP.MAIN_CMPN_FLG=1 AND AP.SERV_TECH_NM IS NOT NULL ) WHERE
+RANK=1 ) AP_CLSS, (select ASSG_PROD_ID,SERV_TECH_NM from ( selec
+t ASSG_PROD_ID,SERV_TECH_NM,rank() over ( partition by assg_prod
+_id order by strt_ts desc,end_ts desc,assg_prod_vrsn_id desc) as
+RANK FROM EP_REL.ASSG_PROD AP WHERE AP.ECF_XPIR_TS='31-dec-9999
+' AND AP.MAIN_CMPN_FLG=1 AND AP.SERV_TECH_NM IS NOT NULL ) WHERE
+RANK=2) AP_PREV_CLSS WHERE ORD_TRAN.SUBS_KEY           = SUBS.S
+UBS_KEY (+)   AND ORD_TRAN.BILL_OFFR_KEY      = ASSG_BILL_OFFR.B
+ILL_OFFR_KEY (+)   AND ORD_TRAN.PROD_CTLG_KEY      = ASSG_CMPN_O
+FFR.PROD_CTLG_KEY (+)   AND ORD_TRAN.ORD_ACTN_STTS_KEY  = OA_STT
+S.ORD_ACTN_STTS_KEY (+)   AND ORD_TRAN.ORD_ACTN_TYPE_KEY  = OA_T
+YPE.ORD_ACTN_TYPE_KEY (+)   AND ORD_TRAN.ORD_ACTN_RSN_KEY   = OA
+_RSN.ORD_ACTN_RSN_KEY (+)   AND ORD_TRAN.MAIN_CTCT_KEY      = CT
+CT.CTCT_KEY(+)   AND ORD_TRAN.CUST_KEY           = CUST.CUST_KEY
+(+)   AND ORD_TRAN.ASSG_PROD_STAT_KEY = ASSG_PROD_STAT.ASSG_PROD
+_STAT_KEY(+)   AND ORD_TRAN.CRTE_EMPL_KEY      = EMPL.EMPL_KEY(+
+)   AND ORD_TRAN.MAIN_PROD_OFFR_KEY = PROD_OFFR.PROD_CTLG_KEY
+AND ORD_TRAN.MAIN_CMPN_ID       = AP_CLSS.ASSG_PROD_ID (+)   AND
+ORD_TRAN.MAIN_CMPN_ID       = AP_PREV_CLSS.ASSG_PROD_ID (+)   A
+ND ORD_TRAN.OPEN_TS            >= SUBS.OPEN_TS (+)   AND ORD_TRA
+N.OPEN_TS            < SUBS.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= OA_STTS.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< OA_STTS.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= OA
+_TYPE.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < OA_TYPE.CL
+SE_TS (+)   AND ORD_TRAN.OPEN_TS            >= OA_RSN.OPEN_TS (+
+)   AND ORD_TRAN.OPEN_TS            < OA_RSN.CLSE_TS (+)   AND O
+RD_TRAN.OPEN_TS            >= CTCT.OPEN_TS (+)   AND ORD_TRAN.OP
+EN_TS            < CTCT.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= CUST.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < CU
+ST.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= ASSG_BILL_OF
+FR.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < ASSG_BILL_OFF
+R.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= ASSG_CMPN_OFF
+R.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < ASSG_CMPN_OFFR
+.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= ASSG_PROD_STAT
+.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < ASSG_PROD_STAT.
+CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= EMPL.OPEN_TS (+
+)   AND ORD_TRAN.OPEN_TS            < EMPL.CLSE_TS (+)   AND UPP
+ER(ORD_TRAN.MAIN_CMPN_NM) IN ('BROADBAND MAIN')   AND UPPER(OA_T
+YPE.ORD_ACTN_TYPE_DS) IN ( 'CHANGE' )   AND UPPER(ORD_ACTN_RSN_D
+S) in ('RECONTRACTING','CHANGE PLAN')   AND ORD_TRAN.MAIN_CTCT_K
+EY <> -1   AND UPPER(CTCT.FRST_NM) NOT LIKE 'BRT%'   AND ORD_TRA
+N.ECF_DELT_FLG = 0   AND ASSG_CMPN_OFFR.PROD_CTLG_ITEM_ID = '862
+3942'   AND ASSG_PRCE_PLAN_ID <> -1   AND ASSG_PRC_PLAN_STTS_KEY
+<> 3   ) a  left join biz_ba.cfg_week_edw h             on   a.
+ord_actn_strt_date_key = h.tm_perd_id  left join bb_mth_subbase
+f     on to_char(add_months(to_date(a.ord_actn_strt_date_key,'YY
+YYMMDD'),-1),'YYYYMM') = f.month_yyyymm     and a.prim_rsrc_valu
+_txt = f.svc_no where ord_actn_stts_ds in (/*'Negotiation',*/ 'D
+elivery', 'Done', 'Completion') -- removed 'Negotiation' on 19-M
+ar-18 after aligning with XY   and cmpn_prod_ds = 'Broadband Pla
+n'   and bill_offr_ds is NOT NULL   and BASE_PLAN_IND = 'Y'   an
+d CUST_CTCT_IDNT_DOC_1_NO is NOT NULL   and CUST_ID is NOT NULL
+and ASSG_PROD_STAT_ID is NOT NULL   and ORD_ACTN_STRT_DATE_KEY
+between to_number(to_char(trunc(sysdate-15),'YYYYMMDD')) and to
+_number(to_char((sysdate-1),'YYYYMMDD'))   ) b   left join biz_b
+a.CFG_DEALER_CHANNEL d             on  b.deal_id = d.dealer_cd
+left join ( select DEALER_CD, bcc_login, shop_dealer_code, team,
+roadshow, DEALER_CD || bcc_login as unique_key, vndr_cd, road_s
+how_strt, road_show_end   from BIZ_BA.CFG_ROADSHOW_DEALER_CHANNE
+L   ) e on b.DEAL_ID = e.DEALER_CD and upper(b.EMPL_OR_SSMN_CD)
+= upper(e.bcc_login) and b.ORD_ACTN_STRT_DATE_KEY between e.road
+_show_strt and e.road_show_end )c )a group by        oed_date
+, oed_day      , week_strt_dt      , weekend      , plan_grp_
+2      , plan_grp      , driver      , port_ind      , seg_grp
+, ORD_ACTN_STTS_DS      , dealer_code      , shop_name
+, team      , team_grp order by 1,4,5,6,7

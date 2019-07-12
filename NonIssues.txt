@@ -1,0 +1,2 @@
+1.sessiontimezone does not take any argument[how to deal with that]
+2.Data type for aggregate functions

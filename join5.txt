@@ -1,0 +1,406 @@
+create table OED_master_table nologging as  select ord_actn_strt
+_date_key, cust_ctct_idnt_doc_1_no, 'TV' as product from ( SELEC
+T DISTINCT ORD_TRAN.ORD_ACTN_ID        AS ORD_ACTN_ID ,
+ORD_TRAN.ORD_ACTN_STRT_TS   AS ORD_ACTN_STRT_TS ,
+ORD_TRAN.ORD_ACTN_STRT_DATE_KEY,                 ORD_T
+RAN.MAIN_CMPN_NM,                 ORD_TRAN.ASSG_PROD_ID       AS
+ASSG_PROD_ID ,                 ORD_TRAN.MAIN_CMPN_ID,
+ORD_TRAN.ASSG_PRCE_PLAN_ID  as ASSG_PRCE_PLAN_ID,
+ORD_TRAN.SERV_TYPE_CD       AS SERV_TYPE_CD,
+ORD_TRAN.ORD_ACTN_DONE_TS   AS ORD_ACTN_DONE_TS ,
+ORD_TRAN.ORD_ACTN_DONE_DATE_KEY,                 ORD_TRA
+N.DEAL_ID,                 ORD_TRAN.DEAL_NM,      -- Added on 13
+Aug 18                 EMPL.EMPL_or_SSMN_CD,   -- Added on 13 A
+ug 18                  SUBS.PRIM_RSRC_VALU_TXT     AS PRIM_RSRC_
+VALU_TXT ,                 SUBS.SUBS_ID                AS SUBS_I
+D ,                  OA_STTS.ORD_ACTN_STTS_DS    as ORD_ACTN_STT
+S_DS ,                 OA_TYPE.ORD_ACTN_TYPE_DS    AS ORD_ACTN_T
+YPE_DS ,                 OA_RSN.ORD_ACTN_RSN_DS      AS ORD_ACTN
+_RSN_DS ,                  CTCT.IDNT_DOC_1_NO          AS CUST_C
+TCT_IDNT_DOC_1_NO ,                 CTCT.FRST_NM,
+CUST.CUST_ID,                  ASSG_BILL_OFFR.BILL_OFFR_DS BIL
+L_OFFR_DS,                 ASSG_BILL_OFFR.BASE_PLAN_IND,
+ASSG_CMPN_OFFR.PROD_DS CMPN_PROD_DS,                 A
+SSG_PROD_STAT.ASSG_PROD_STAT_ID/*,                 CHNL_NM.SALE_
+SERV_CHNL_NM*/   FROM EP_REL.ORD_TRAN,       (SELECT SUBS_KEY,SU
+BS_ID,PRIM_RSRC_VALU_TXT,OPEN_TS,CLSE_TS                 FROM EP
+_REL.SUBS WHERE  ECF_DELT_FLG = 0            ) SUBS,       (SELE
+CT ORD_ACTN_STTS_KEY,ORD_ACTN_STTS_DS,OPEN_TS,CLSE_TS
+FROM EP_REL.ORD_ACTN_STTS  WHERE  ECF_DELT_FLG = 0  ) OA_
+STTS,       (SELECT ORD_ACTN_TYPE_KEY,ORD_ACTN_TYPE_DS,ORD_ACTN_
+TYPE_ID,OPEN_TS,CLSE_TS FROM EP_REL.ORD_ACTN_TYPE  WHERE  ECF_DE
+LT_FLG = 0  ) OA_TYPE,       (SELECT ORD_ACTN_RSN_KEY,ORD_ACTN_R
+SN_DS,ORD_ACTN_RSN_ID,OPEN_TS,CLSE_TS    FROM EP_REL.ORD_ACTN_RS
+N  WHERE  ECF_DELT_FLG = 0   ) OA_RSN,       (SELECT CTCT_KEY,ID
+NT_DOC_1_NO,OPEN_TS,CLSE_TS,FRST_NM                      FROM EP
+_REL.CTCT WHERE  ECF_DELT_FLG = 0            ) CTCT,       (SELE
+CT CUST_KEY,CUST_ID,OPEN_TS,CLSE_TS
+FROM EP_REL.CUST WHERE  ECF_DELT_FLG = 0            ) CUS
+T,       (SELECT BASE_PLAN_IND,OPEN_TS,CLSE_TS,BILL_OFFR_KEY,BIL
+L_OFFR_DS            FROM EP_REL.BILL_OFFR WHERE  ECF_DELT_FLG =
+0       ) ASSG_BILL_OFFR,       (SELECT PROD_CTLG_ITEM_ID,PROD_
+CTLG_KEY, PROD_DS,OPEN_TS,CLSE_TS            FROM EP_REL.PROD_CT
+LG WHERE  ECF_DELT_FLG = 0       ) ASSG_CMPN_OFFR,       (SELECT
+ASSG_PROD_STAT_ID,OPEN_TS,CLSE_TS,ASSG_PROD_STAT_KEY
+FROM EP_REL.ASSG_PROD_STAT WHERE  ECF_DELT_FLG = 0  ) ASSG_
+PROD_STAT,       /*(SELECT SALE_SERV_CHNL_KEY, SALE_SERV_CHNL_NM
+, OPEN_TS, CLSE_TS             FROM EP_REL.SALE_SERV_CHNL WHERE
+ECF_DELT_FLG = 0  ) CHNL_NM,*/       (SELECT EMPL_OR_SSMN_CD,OP
+EN_TS,CLSE_TS,EMPL_KEY from EP_REL.EMPL  where ECF_DELT_FLG = 0)
+EMPL  -- Added on 13 Aug 18   WHERE   ORD_TRAN.SUBS_KEY
+= SUBS.SUBS_KEY (+)   AND ORD_TRAN.BILL_OFFR_KEY
+= ASSG_BILL_OFFR.BILL_OFFR_KEY (+)   AND ORD_TRAN.PROD_CTLG
+_KEY          = ASSG_CMPN_OFFR.PROD_CTLG_KEY (+)   AND ORD_TRAN.
+ORD_ACTN_STTS_KEY      = OA_STTS.ORD_ACTN_STTS_KEY (+)   AND ORD
+_TRAN.ORD_ACTN_TYPE_KEY      = OA_TYPE.ORD_ACTN_TYPE_KEY (+)   A
+ND ORD_TRAN.ORD_ACTN_RSN_KEY       = OA_RSN.ORD_ACTN_RSN_KEY (+)
+AND ORD_TRAN.MAIN_CTCT_KEY          = CTCT.CTCT_KEY(+)   AND
+ORD_TRAN.CUST_KEY               = CUST.CUST_KEY(+)   AND ORD_TRA
+N.ASSG_PROD_STAT_KEY     = ASSG_PROD_STAT.ASSG_PROD_STAT_KEY(+)
+/*AND ORD_TRAN.INIT_SALE_SERV_CHNL_KEY = CHNL_NM.SALE_SERV_CHN
+L_KEY(+)*/   AND ORD_TRAN.OPEN_TS                >= SUBS.OPEN_TS
+(+)   and ORD_TRAN.OPEN_TS                < SUBS.CLSE_TS (+)
+AND ORD_TRAN.OPEN_TS                >= OA_STTS.OPEN_TS (+)   AND
+ORD_TRAN.OPEN_TS                < OA_STTS.CLSE_TS (+)   AND ORD
+_TRAN.OPEN_TS                >= OA_TYPE.OPEN_TS (+)   AND ORD_TR
+AN.OPEN_TS                < OA_TYPE.CLSE_TS (+)   AND ORD_TRAN.O
+PEN_TS                >= OA_RSN.OPEN_TS (+)   AND ORD_TRAN.OPEN_
+TS                < OA_RSN.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= CTCT.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< CTCT.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= CUST.OPEN_TS (+)   and ORD_TRAN.OPEN_TS                < CUST
+.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS                >= ASSG_BILL_
+OFFR.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS                < ASSG_BI
+LL_OFFR.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS                >= ASS
+G_CMPN_OFFR.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS                <
+ASSG_CMPN_OFFR.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= ASSG_PROD_STAT.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< ASSG_PROD_STAT.CLSE_TS (+)   /*AND ORD_TRAN.OPEN_TS
+>= CHNL_NM.OPEN_TS (+)*/  /* AND ORD_TRAN.OPEN_TS
+< CHNL_NM.CLSE_TS (+)*/   AND ORD_TRAN.CRTE_EMPL_KEY
+= EMPL.EMPL_KEY(+) -- Added   AND ORD_TRAN.OPEN_TS
+>= EMPL.OPEN_TS (+)    -- Added   AND ORD_TRAN.OPEN_TS
+< EMPL.CLSE_TS (+)     -- Added    AND UPPER(ORD_TRAN.M
+AIN_CMPN_NM) IN ('TV MAIN','CROSS CARRIAGE MAIN')   AND UPPER(OA
+_TYPE.ORD_ACTN_TYPE_DS) IN ( 'PROVIDE' )   AND ORD_TRAN.ECF_DELT
+_FLG = 0   AND UPPER(CTCT.FRST_NM) not like 'BRT%'   --AND ORD_T
+RAN.ORD_ACTN_STRT_DATE_KEY BETWEEN TO_CHAR(TRUNC(SYSDATE-7, 'IW'
+),'YYYYMMDD') AND TO_CHAR(NEXT_DAY(TRUNC(SYSDATE-7,'IW'),'SUNDAY
+'),'YYYYMMDD')   AND ORD_TRAN.ORD_ACTN_STRT_DATE_KEY BETWEEN 201
+90101 and (select end_date from broadband_oed)   --AND ASSG_CMPN
+_OFFR.PROD_CTLG_ITEM_ID in ('8635012' ,'8900892' ,'8704672' ,'86
+33012' ,'8632982') )  union all  select ord_actn_strt_date_key,
+cust_ctct_idnt_doc_1_no, 'Broadband' as product from ( SELECT DI
+STINCT ORD_TRAN.ORD_ACTN_ID        AS ORD_ACTN_ID ,
+ORD_TRAN.ORD_ID             AS ORDER_ID,                 ORD
+_TRAN.DEAL_ID,                 ORD_TRAN.DEAL_NM,
+ORD_TRAN.VNDR_ID,                 ORD_TRAN.VNDR_NM,
+SUBS.ACCS_LKGE_ID,                 ORD_TRAN.CUST_RQST_TS,
+SUBS.BB_USER_NM,                 EMPL.EMPL_OR_SSM
+N_CD,                 ORD_TRAN.ORD_ACTN_STRT_TS   AS ORD_ACTN_ST
+RT_TS ,                 ORD_TRAN.ORD_ACTN_STRT_DATE_KEY,
+ORD_TRAN.MAIN_CMPN_NM,                 ASSG_CMPN_OFFR.P
+ROD_DS CMPN_PROD_DS,                 ASSG_BILL_OFFR.BILL_OFFR_DS
+BILL_OFFR_DS,                 ASSG_BILL_OFFR.BASE_PLAN_IND,
+CUST.CUST_ID,                 CTCT.IDNT_DOC_1_NO
+AS CUST_CTCT_IDNT_DOC_1_NO ,                 CTCT.FRST_NM
+,                 SUBS.PRIM_RSRC_VALU_TXT     AS PRIM_RSRC_VALU_
+TXT ,                 ORD_TRAN.SERV_TYPE_CD       AS SERV_TYPE_C
+D,                 ORD_TRAN.ORD_ACTN_DONE_TS   AS ORD_ACTN_DONE_
+TS ,                 ORD_TRAN.ORD_ACTN_DONE_DATE_KEY,
+ORD_TRAN.ORD_TRAN_YEAR_MNTH_NO,                 SUBS.SUBS_
+ID                AS SUBS_ID ,                 OA_STTS.ORD_ACTN_
+STTS_DS    as ORD_ACTN_STTS_DS ,                 ASSG_PROD_STAT.
+ASSG_PROD_STAT_ID,                 OA_TYPE.ORD_ACTN_TYPE_DS    A
+S ORD_ACTN_TYPE_DS ,                 OA_RSN.ORD_ACTN_RSN_DS
+AS ORD_ACTN_RSN_DS ,                 ORD_TRAN.ASSG_PROD_ID
+AS ASSG_PROD_ID ,                 ORD_TRAN.MAIN_CMPN_ID,
+ORD_TRAN.ASSG_PRCE_PLAN_ID  as ASSG_PRCE_PLAN_ID,
+PROD_OFFR.PROD_DS AS MAIN_PROD_OFFR_DS,
+ASSG_BILL_OFFR.BILL_OFFR_ID/*, -- added to populate config
+table                 CHNL_NM.SALE_SERV_CHNL_NM*/  FROM EP_REL.O
+RD_TRAN, (SELECT SUBS_KEY,BB_USER_NM,ACCS_LKGE_ID,SUBS_ID,PRIM_R
+SRC_VALU_TXT,OPEN_TS,CLSE_TS,MAIN_PROD_OFFR_DS FROM EP_REL.SUBS
+WHERE  ECF_DELT_FLG = 0  )  SUBS, (SELECT ORD_ACTN_STT
+S_KEY,ORD_ACTN_STTS_DS,OPEN_TS,CLSE_TS
+FROM EP_REL.ORD_ACTN_STTS  WHERE  ECF_DELT_FLG
+= 0  )  OA_STTS, (SELECT ORD_ACTN_TYPE_KEY,ORD_ACTN_TYPE_DS,ORD
+_ACTN_TYPE_ID,OPEN_TS,CLSE_TS                           FROM EP_
+REL.ORD_ACTN_TYPE  WHERE  ECF_DELT_FLG = 0  )  OA_TYPE, (SELECT
+ORD_ACTN_RSN_KEY,ORD_ACTN_RSN_DS,ORD_ACTN_RSN_ID,OPEN_TS,CLSE_TS
+FROM EP_REL.ORD_ACTN_RSN   WHERE
+ECF_DELT_FLG = 0  )  OA_RSN, (SELECT CTCT_KEY,IDNT_DOC_1_NO,OPEN
+_TS,CLSE_TS,FRST_NM
+FROM EP_REL.CTCT           WHERE  ECF_DELT_FLG = 0  ) CTCT, (
+SELECT CUST_KEY,CUST_ID,OPEN_TS,CLSE_TS
+FROM EP_REL.CUST
+WHERE  ECF_DELT_FLG = 0  ) CUST, (SELECT BASE_PLAN_IND,OPEN_TS,C
+LSE_TS,BILL_OFFR_KEY,BILL_OFFR_DS,BILL_OFFR_ID
+FROM EP_REL.BILL_OFFR      WHERE  ECF_DELT_FLG = 0  ) ASS
+G_BILL_OFFR, (SELECT PROD_CTLG_ITEM_ID,PROD_CTLG_KEY, PROD_DS,OP
+EN_TS,CLSE_TS                                      FROM EP_REL.P
+ROD_CTLG      WHERE  ECF_DELT_FLG = 0  ) ASSG_CMPN_OFFR, (SELECT
+EMPL_OR_SSMN_CD,OPEN_TS,CLSE_TS,EMPL_KEY
+FROM EP_REL.EMPL           WHERE
+ECF_DELT_FLG = 0) EMPL, (SELECT ASSG_PROD_STAT_ID,OPEN_TS,CLSE_T
+S,ASSG_PROD_STAT_KEY                                          FR
+OM EP_REL.ASSG_PROD_STAT WHERE  ECF_DELT_FLG = 0  ) ASSG_PROD_ST
+AT, (select PROD_DS , PROD_cTLG_KEY
+FROM EP_REL.PROD_CTLG
+WHERE ECF_DELT_FLG=0 AND ECF_XPIR_TS='31-DEC-9999') PROD_OF
+FR/*, (SELECT SALE_SERV_CHNL_KEY, SALE_SERV_CHNL_NM, OPEN_TS, CL
+SE_TS                                       FROM EP_REL.SALE_SER
+V_CHNL WHERE  ECF_DELT_FLG = 0  ) CHNL_NM*/  WHERE  ORD_TRAN.SUB
+S_KEY                = SUBS.SUBS_KEY (+)   AND ORD_TRAN.BILL_OFF
+R_KEY      = ASSG_BILL_OFFR.BILL_OFFR_KEY (+)   AND ORD_TRAN.PRO
+D_CTLG_KEY      = ASSG_CMPN_OFFR.PROD_CTLG_KEY (+)   AND ORD_TRA
+N.ORD_ACTN_STTS_KEY  = OA_STTS.ORD_ACTN_STTS_KEY (+)   AND ORD_T
+RAN.ORD_ACTN_TYPE_KEY  = OA_TYPE.ORD_ACTN_TYPE_KEY (+)   AND ORD
+_TRAN.ORD_ACTN_RSN_KEY   = OA_RSN.ORD_ACTN_RSN_KEY (+)   AND ORD
+_TRAN.MAIN_CTCT_KEY      = CTCT.CTCT_KEY(+)   AND ORD_TRAN.CUST_
+KEY           = CUST.CUST_KEY(+)   AND ORD_TRAN.ASSG_PROD_STAT_K
+EY = ASSG_PROD_STAT.ASSG_PROD_STAT_KEY(+)   AND ORD_TRAN.CRTE_EM
+PL_KEY      = EMPL.EMPL_KEY(+)   AND ORD_TRAN.MAIN_PROD_OFFR_KEY
+=PROD_OFFR.PROD_CTLG_KEY (+)   AND ORD_TRAN.OPEN_TS
+>= SUBS.OPEN_TS (+)   and ORD_TRAN.OPEN_TS            < SUBS.CLS
+E_TS (+)   AND ORD_TRAN.OPEN_TS            >= OA_STTS.OPEN_TS (+
+)   AND ORD_TRAN.OPEN_TS            < OA_STTS.CLSE_TS (+)   AND
+ORD_TRAN.OPEN_TS            >= OA_TYPE.OPEN_TS (+)   AND ORD_TRA
+N.OPEN_TS            < OA_TYPE.CLSE_TS (+)   AND ORD_TRAN.OPEN_T
+S            >= OA_RSN.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< OA_RSN.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= C
+TCT.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < CTCT.CLSE_TS
+(+)   AND ORD_TRAN.OPEN_TS            >= CUST.OPEN_TS (+)   and
+ORD_TRAN.OPEN_TS            < CUST.CLSE_TS (+)   AND ORD_TRAN.O
+PEN_TS            >= ASSG_BILL_OFFR.OPEN_TS (+)   AND ORD_TRAN.O
+PEN_TS            < ASSG_BILL_OFFR.CLSE_TS (+)   AND ORD_TRAN.OP
+EN_TS            >= ASSG_CMPN_OFFR.OPEN_TS (+)   AND ORD_TRAN.OP
+EN_TS            < ASSG_CMPN_OFFR.CLSE_TS (+)   AND ORD_TRAN.OPE
+N_TS            >= ASSG_PROD_STAT.OPEN_TS (+)   AND ORD_TRAN.OPE
+N_TS            < ASSG_PROD_STAT.CLSE_TS (+)   AND ORD_TRAN.OPEN
+_TS            >= EMPL.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< EMPL.CLSE_TS (+)   /*AND ORD_TRAN.OPEN_TS            >= C
+HNL_NM.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < CHNL_NM.C
+LSE_TS (+)*/   /*AND ORD_TRAN.ORD_ACTN_STRT_DATE_KEY BETWEEN 201
+80201 AND 20180227 */   AND UPPER(ORD_TRAN.MAIN_CMPN_NM) IN ('BR
+OADBAND MAIN')   AND UPPER(OA_TYPE.ORD_ACTN_TYPE_DS) IN ( 'PROVI
+DE' )   AND ORD_TRAN.MAIN_CTCT_KEY <> -1   AND UPPER(CTCT.FRST_N
+M) NOT LIKE 'BRT%'   AND ORD_TRAN.ECF_DELT_FLG = 0   AND ASSG_CM
+PN_OFFR.PROD_CTLG_ITEM_ID = '8623942'   AND ASSG_PRCE_PLAN_ID <>
+-1   --and ORD_ACTN_STRT_DATE_KEY between TO_CHAR(TRUNC(SYSDATE
+-7, 'IW'),'YYYYMMDD') AND TO_CHAR(NEXT_DAY(TRUNC(SYSDATE-7,'IW')
+,'SUNDAY'),'YYYYMMDD')  --- For TV OED;   AND ORD_TRAN.ORD_ACTN_
+STRT_DATE_KEY BETWEEN 20190101 and (select end_date from broadba
+nd_oed)   AND upper(OA_STTS.ORD_ACTN_STTS_DS) in (/*'Negotiation
+',*/'DELIVERY', 'DONE'/*,'Cancelled'*/,'COMPLETION')   and upper
+(ASSG_CMPN_OFFR.PROD_DS) = 'BROADBAND PLAN'   and ASSG_BILL_OFFR
+.BILL_OFFR_DS is NOT NULL   and  ASSG_BILL_OFFR.BASE_PLAN_IND =
+'Y'   and CTCT.IDNT_DOC_1_NO is NOT NULL   and CUST.CUST_ID is N
+OT NULL   and ASSG_PROD_STAT.ASSG_PROD_STAT_ID is NOT NULL   )
+union all  select ord_actn_strt_date_key, cust_ctct_idnt_doc_1_n
+o, 'Broadband' as product  from (  SELECT DISTINCT ORD_TRAN.ORD_
+ACTN_ID        AS ORD_ACTN_ID ,                 ORD_TRAN.ORD_ID
+AS ORDER_ID,                 ORD_TRAN.DEAL_ID,
+ORD_TRAN.DEAL_NM,                 ORD_TRAN.VNDR_ID,
+ORD_TRAN.VNDR_NM,                 ORD_TRAN.CUST_R
+QST_TS,                 SUBS.BB_USER_NM,                 SUBS.AC
+CS_LKGE_ID,                 EMPL.EMPL_OR_SSMN_CD,
+ORD_TRAN.ORD_ACTN_STRT_TS   AS ORD_ACTN_STRT_TS ,
+ORD_TRAN.ORD_ACTN_STRT_DATE_KEY,                 ORD_TRAN.MA
+IN_CMPN_NM,                 ASSG_CMPN_OFFR.PROD_DS CMPN_PROD_DS,
+ASSG_BILL_OFFR.BILL_OFFR_DS BILL_OFFR_DS,
+ASSG_BILL_OFFR.BASE_PLAN_IND,                 CUST.CU
+ST_ID,                 CTCT.IDNT_DOC_1_NO          AS CUST_CTCT_
+IDNT_DOC_1_NO ,                 CTCT.FRST_NM,                 SU
+BS.PRIM_RSRC_VALU_TXT     AS PRIM_RSRC_VALU_TXT ,
+ORD_TRAN.SERV_TYPE_CD       AS SERV_TYPE_CD,                 O
+RD_TRAN.ORD_ACTN_DONE_TS   AS ORD_ACTN_DONE_TS ,
+ORD_TRAN.ORD_ACTN_DONE_DATE_KEY,                 ORD_TRAN.ORD_T
+RAN_YEAR_MNTH_NO,                 SUBS.SUBS_ID                AS
+SUBS_ID ,                 OA_STTS.ORD_ACTN_STTS_DS    as ORD_AC
+TN_STTS_DS ,                 ASSG_PROD_STAT.ASSG_PROD_STAT_ID,
+OA_TYPE.ORD_ACTN_TYPE_DS    AS ORD_ACTN_TYPE_DS ,
+OA_RSN.ORD_ACTN_RSN_DS      AS ORD_ACTN_RSN_DS
+,                 ORD_TRAN.ASSG_PROD_ID       AS ASSG_PROD_ID ,
+ORD_TRAN.MAIN_CMPN_ID,                 ORD_TRAN.
+ASSG_PRCE_PLAN_ID  AS ASSG_PRCE_PLAN_ID,                 PROD_OF
+FR.PROD_DS           AS MAIN_PROD_OFFR_DS,                 AP_CL
+SS.SERV_TECH_NM        AS MAIN_PROD_OFFR_CLSS_DS,
+AP_PREV_CLSS.SERV_TECH_NM   AS PREV_MAIN_PROD_OFFR_CLSS_DS,
+ASSG_BILL_OFFR.BILL_OFFR_ID/*, -- added to populat
+e config table                 CHNL_NM.SALE_SERV_CHNL_NM*/  FROM
+EP_REL.ORD_TRAN, (SELECT SUBS_KEY,ACCS_LKGE_ID,SUBS_ID,BB_USER_
+NM,PRIM_RSRC_VALU_TXT,OPEN_TS,CLSE_TS,MAIN_PROD_OFFR_CLSS_DS,PRE
+V_MAIN_PROD_OFFR_CLSS_DS,MAIN_PROD_OFFR_DS,PREV_MAIN_PROD_OFFR_D
+S FROM EP_REL.SUBS WHERE  ECF_DELT_FLG = 0  )  SUBS, (SELECT ORD
+_ACTN_STTS_KEY,ORD_ACTN_STTS_DS,OPEN_TS,CLSE_TS FROM EP_REL.ORD_
+ACTN_STTS  WHERE  ECF_DELT_FLG = 0  )  OA_STTS, (SELECT ORD_ACTN
+_TYPE_KEY,ORD_ACTN_TYPE_DS,ORD_ACTN_TYPE_ID,OPEN_TS,CLSE_TS FROM
+EP_REL.ORD_ACTN_TYPE  WHERE  ECF_DELT_FLG = 0  )  OA_TYPE, (SEL
+ECT ORD_ACTN_RSN_KEY,ORD_ACTN_RSN_DS,ORD_ACTN_RSN_ID,OPEN_TS,CLS
+E_TS FROM EP_REL.ORD_ACTN_RSN  WHERE  ECF_DELT_FLG = 0  )  OA_RS
+N, (SELECT CTCT_KEY,IDNT_DOC_1_NO,OPEN_TS,CLSE_TS,FRST_NM FROM E
+P_REL.CTCT WHERE  ECF_DELT_FLG = 0  ) CTCT, (SELECT CUST_KEY,CUS
+T_ID,OPEN_TS,CLSE_TS FROM EP_REL.CUST WHERE  ECF_DELT_FLG = 0  )
+CUST, (SELECT BASE_PLAN_IND,OPEN_TS,CLSE_TS,BILL_OFFR_KEY,BILL_
+OFFR_DS,BILL_OFFR_ID  FROM EP_REL.BILL_OFFR WHERE  ECF_DELT_FLG
+= 0  ) ASSG_BILL_OFFR, (SELECT PROD_CTLG_ITEM_ID,PROD_CTLG_KEY,
+PROD_DS,OPEN_TS,CLSE_TS FROM EP_REL.PROD_CTLG WHERE  ECF_DELT_FL
+G = 0  ) ASSG_CMPN_OFFR, (SELECT EMPL_OR_SSMN_CD,OPEN_TS,CLSE_TS
+,EMPL_KEY from EP_REL.EMPL  where ECF_DELT_FLG = 0) EMPL, (SELEC
+T ASSG_PROD_STAT_ID,OPEN_TS,CLSE_TS,ASSG_PROD_STAT_KEY FROM EP_R
+EL.ASSG_PROD_STAT WHERE  ECF_DELT_FLG = 0  ) ASSG_PROD_STAT, (se
+lect PROD_DS , PROD_cTLG_KEY FROM EP_REL.PROD_CTLG WHERE ECF_DEL
+T_FLG=0 AND ECF_XPIR_TS='31-DEC-9999') PROD_OFFR, (SELECT ASSG_P
+ROD_ID,SERV_TECH_NM FROM ( select ASSG_PROD_ID,SERV_TECH_NM, ran
+k() over ( partition by assg_prod_id order by strt_ts desc,end_t
+s desc,assg_prod_vrsn_id desc) as RANK FROM EP_REL.ASSG_PROD AP
+WHERE AP.ECF_XPIR_TS='31-dec-9999' AND AP.MAIN_CMPN_FLG=1 AND AP
+.SERV_TECH_NM IS NOT NULL ) WHERE RANK=1 ) AP_CLSS, (select ASSG
+_PROD_ID,SERV_TECH_NM from ( select ASSG_PROD_ID,SERV_TECH_NM,ra
+nk() over ( partition by assg_prod_id order by strt_ts desc,end_
+ts desc,assg_prod_vrsn_id desc) as RANK FROM EP_REL.ASSG_PROD AP
+WHERE AP.ECF_XPIR_TS='31-dec-9999' AND AP.MAIN_CMPN_FLG=1 AND A
+P.SERV_TECH_NM IS NOT NULL ) WHERE RANK=2) AP_PREV_CLSS /*, (SEL
+ECT SALE_SERV_CHNL_KEY, SALE_SERV_CHNL_NM, OPEN_TS, CLSE_TS
+FROM EP_REL.SALE_SERV_CHNL WHERE  ECF_DELT_FLG = 0
+) CHNL_NM*/  WHERE ORD_TRAN.SUBS_KEY           = SUBS.SUBS_KEY (
++)   AND ORD_TRAN.BILL_OFFR_KEY      = ASSG_BILL_OFFR.BILL_OFFR_
+KEY (+)   AND ORD_TRAN.PROD_CTLG_KEY      = ASSG_CMPN_OFFR.PROD_
+CTLG_KEY (+)   AND ORD_TRAN.ORD_ACTN_STTS_KEY  = OA_STTS.ORD_ACT
+N_STTS_KEY (+)   AND ORD_TRAN.ORD_ACTN_TYPE_KEY  = OA_TYPE.ORD_A
+CTN_TYPE_KEY (+)   AND ORD_TRAN.ORD_ACTN_RSN_KEY   = OA_RSN.ORD_
+ACTN_RSN_KEY (+)   AND ORD_TRAN.MAIN_CTCT_KEY      = CTCT.CTCT_K
+EY(+)   AND ORD_TRAN.CUST_KEY           = CUST.CUST_KEY(+)   AND
+ORD_TRAN.ASSG_PROD_STAT_KEY = ASSG_PROD_STAT.ASSG_PROD_STAT_KEY
+(+)   AND ORD_TRAN.CRTE_EMPL_KEY      = EMPL.EMPL_KEY(+)   AND O
+RD_TRAN.MAIN_PROD_OFFR_KEY = PROD_OFFR.PROD_CTLG_KEY   AND ORD_T
+RAN.MAIN_CMPN_ID       = AP_CLSS.ASSG_PROD_ID (+)   AND ORD_TRAN
+.MAIN_CMPN_ID       = AP_PREV_CLSS.ASSG_PROD_ID (+)   AND ORD_TR
+AN.OPEN_TS            >= SUBS.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< SUBS.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS
+>= OA_STTS.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < OA_S
+TTS.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >= OA_TYPE.OPE
+N_TS (+)   AND ORD_TRAN.OPEN_TS            < OA_TYPE.CLSE_TS (+)
+AND ORD_TRAN.OPEN_TS            >= OA_RSN.OPEN_TS (+)   AND O
+RD_TRAN.OPEN_TS            < OA_RSN.CLSE_TS (+)   AND ORD_TRAN.O
+PEN_TS            >= CTCT.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< CTCT.CLSE_TS (+)   AND ORD_TRAN.OPEN_TS            >=
+CUST.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS            < CUST.CLSE_T
+S (+)   AND ORD_TRAN.OPEN_TS            >= ASSG_BILL_OFFR.OPEN_T
+S (+)   AND ORD_TRAN.OPEN_TS            < ASSG_BILL_OFFR.CLSE_TS
+(+)   AND ORD_TRAN.OPEN_TS            >= ASSG_CMPN_OFFR.OPEN_TS
+(+)   AND ORD_TRAN.OPEN_TS            < ASSG_CMPN_OFFR.CLSE_TS
+(+)   AND ORD_TRAN.OPEN_TS            >= ASSG_PROD_STAT.OPEN_TS
+(+)   AND ORD_TRAN.OPEN_TS            < ASSG_PROD_STAT.CLSE_TS (
++)   AND ORD_TRAN.OPEN_TS            >= EMPL.OPEN_TS (+)   AND O
+RD_TRAN.OPEN_TS            < EMPL.CLSE_TS (+)   /*AND ORD_TRAN.O
+PEN_TS            >= CHNL_NM.OPEN_TS (+)   AND ORD_TRAN.OPEN_TS
+< CHNL_NM.CLSE_TS (+)*/    /*AND ORD_TRAN.ORD_ACTN_ST
+RT_DATE_KEY BETWEEN 20180201 AND 20180227*/   AND UPPER(ORD_TRAN
+.MAIN_CMPN_NM) IN ('BROADBAND MAIN')   AND UPPER(OA_TYPE.ORD_ACT
+N_TYPE_DS) IN ( 'CHANGE' )   AND UPPER(ORD_ACTN_RSN_DS) in ('REC
+ONTRACTING','CHANGE PLAN')   AND ORD_TRAN.MAIN_CTCT_KEY <> -1
+AND UPPER(CTCT.FRST_NM) NOT LIKE 'BRT%'   AND ORD_TRAN.ECF_DELT_
+FLG = 0   AND ASSG_CMPN_OFFR.PROD_CTLG_ITEM_ID = '8623942'   AND
+ASSG_PRCE_PLAN_ID <> -1   AND ASSG_PRC_PLAN_STTS_KEY <> 3   --A
+ND ORD_ACTN_STRT_DATE_KEY between TO_CHAR(TRUNC(SYSDATE-7, 'IW')
+,'YYYYMMDD') AND TO_CHAR(NEXT_DAY(TRUNC(SYSDATE-7,'IW'),'SUNDAY'
+),'YYYYMMDD')  --- For TV OED;   AND ORD_TRAN.ORD_ACTN_STRT_DATE
+_KEY BETWEEN 20190101 and (select end_date from broadband_oed)
+AND upper(OA_STTS.ORD_ACTN_STTS_DS) in (/*'Negotiation',*/'DELI
+VERY', 'DONE'/*,'Cancelled'*/,'COMPLETION')   and upper(ASSG_CMP
+N_OFFR.PROD_DS) = 'BROADBAND PLAN'   and ASSG_BILL_OFFR.BILL_OFF
+R_DS is NOT NULL   and  ASSG_BILL_OFFR.BASE_PLAN_IND = 'Y'   and
+CTCT.IDNT_DOC_1_NO is NOT NULL   and CUST.CUST_ID is NOT NULL
+and ASSG_PROD_STAT.ASSG_PROD_STAT_ID is NOT NULL    )  union al
+l  select ord_actn_strt_date_key, idnt_doc_1_no, 'Mobile' as pro
+duct  from (  select              row_number() over (partition b
+y oa.ord_actn_strt_date_key, s.subs_id order by oa.ord_actn_id)
+as row_num            , oa.ord_actn_strt_date_key            , c
+ase when oat.ord_actn_type_ds in ('Provide','Reestablish') or oa
+r.ord_actn_rsn_ds = 'Pre to Post' then 'Gross Add'
+when oat.ord_actn_type_ds in ('Cease', 'Collection Cease')
+then 'Churn' -- 'Cease' = Vol EC + 'Collection Cease' = Invol EC
+when (oat.ord_actn_type_ds in ('Change','Chan
+ge Ownership') AND UPPER(ORD_ACTN_RSN_DS) in ('RECONTRACTING') )
+then 'Recon' -- SIM Only is captured                   end as d
+river_ind            , case when (oat.ord_actn_type_ds in ('Prov
+ide','Reestablish')) and s.port_type_cd = 'I' and upper(s.port_o
+per_nm) like 'STARHUB' then 'Port In - StarHub'
+when (oat.ord_actn_type_ds in ('Provide','Reestablish')) and s
+.port_type_cd = 'I' and upper(s.port_oper_nm) like 'M1' then 'Po
+rt In - M1'                   when (oat.ord_actn_type_ds in ('Ce
+ase')) and s.port_type_cd = 'E' and upper(s.port_oper_nm) like '
+STARHUB' then 'Port Out - StarHub'                   when (oat.o
+rd_actn_type_ds in ('Cease')) and s.port_type_cd = 'E' and upper
+(s.port_oper_nm) like 'M1' then 'Port Out - M1'
+end as port_ind            , to_char(oa.ord_actn_id) as ord_ac
+tn_id            , s.prim_rsrc_valu_txt as svc_no            , s
+.subs_id            , bo.bill_offr_ds AS PRICE_PLAN            ,
+Z.PRICE_PLAN_GP            , Z.PLAN_IND            , Z.PRICE_PL
+AN_CTG            , eq.equp_modl_nm as HANDSET_MODEL
+, oa.deal_id as dealer_cd            , em.empl_or_ssmn_cd as sal
+esman_cd            , c.idnt_doc_1_no       from (select *
+from  EP_REL.ord_actn oa             where trunc(oa.ecf_x
+pir_ts) = '31-DEC-9999'             and  oa.ecf_delt_flg = 0
+--and  oa.ord_actn_strt_date_key between to_number(to_c
+har(trunc(sysdate-21,'IW'),'YYYYMMDD')) and to_number(to_char((s
+ysdate-1),'YYYYMMDD'))             and  oa.main_flg = 1
+and  oa.ord_stts_key <> 1 -- Cancelled             and  oa.p
+rnt_rel_type_cd <> 'CA'             ) oa       left  join EP_REL
+.ord_actn_rsn oar             on   oa.ord_actn_rsn_key = oar.ord
+_actn_rsn_key             and  trunc(oar.ecf_xpir_ts) = '31-DEC-
+9999'             and  oar.ecf_delt_flg = 0       left  join EP_
+REL.ord_actn_type oat             on   oa.ord_actn_type_key = oa
+t.ord_actn_type_key             and  trunc(oat.ecf_xpir_ts) = '3
+1-DEC-9999'             and  oat.ecf_delt_flg = 0       left  jo
+in EP_REL.ord_actn_stts oas             on   oa.ord_actn_stts_ke
+y = oas.ord_actn_stts_key             and  trunc(oas.ecf_xpir_ts
+) = '31-DEC-9999'             and  oas.ecf_delt_flg = 0       le
+ft  join EP_REL.subs s             on   oa.subs_key = s.subs_key
+and  trunc(s.ecf_xpir_ts) = '31-DEC-9999'
+and  s.ecf_delt_flg = 0       left  join EP_REL.bill_offr bo
+on   s.main_bill_offr_key = bo.bill_offr_key
+and  trunc(bo.ecf_xpir_ts) = '31-DEC-9999'             and
+bo.ecf_delt_flg = 0       left  join EP_REL.line_of_bsns slob
+on   s.subs_line_of_bsns_id = slob.line_of_bsns_id
+and  trunc(slob.ecf_xpir_ts) = '31-DEC-9999'
+and  slob.ecf_delt_flg = 0       left  join EP_REL.prod_line_
+of_bsns plob             on   s.prod_line_of_bsns_key = plob.pro
+d_line_of_bsns_key             and  trunc(plob.ecf_xpir_ts) = '3
+1-DEC-9999'             and  plob.ecf_delt_flg = 0       left  j
+oin EP_REL.cust_ctct_rel ccr             on   s.cust_key = ccr.c
+ust_key             and  trunc(ccr.ecf_xpir_ts) = '31-DEC-9999'
+and  ccr.ecf_delt_flg = 0             and  ccr.role_
+name_type = 'Primary'             and  ccr.actv_ind = 1       le
+ft  join EP_REL.ctct c             on   ccr.ctct_key = c.ctct_ke
+y             and  trunc(c.ecf_xpir_ts) = '31-DEC-9999'
+and  c.ecf_delt_flg = 0       left  join EP_REL.cust_type ct
+on   oa.cust_type_key = ct.cust_type_key
+and  trunc(ct.ecf_xpir_ts) = '31-DEC-9999'             and  ct
+.ecf_delt_flg = 0       left  join EP_REL.ord_tran ot
+on   trunc(ot.ecf_xpir_ts) = '31-DEC-9999'             and  ot
+.ecf_delt_flg = 0             and  ot.main_cmpn_nm = 'Mobile Mai
+n'             and  ot.main_bill_offr_key = ot.bill_offr_key
+and  ot.bill_offr_assg_stts_id <> 'Removed'
+and  oa.ord_actn_key = ot.ord_actn_key             and  oa.ord_
+actn_done_date_key = ot.ord_actn_done_date_key       left  join
+EP_REL.equp_ctlg eq             on   trunc(eq.ecf_xpir_ts) = '31
+-DEC-9999'             and  eq.ecf_delt_flg = 0             and
+ot.equp_ctlg_key = eq.equp_ctlg_key       left  join EP_REL.emp
+l em             on   trunc(em.ecf_xpir_ts) = '31-DEC-9999'
+and  em.ecf_delt_flg = 0             and  ot.crte_empl_k
+ey = em.empl_key       left  join BIZ_BA.cfg_bill_offer z
+on   bo.bill_offr_ds = z.bill_offr_ds       where upper(ct
+.cust_type_ds) = 'CONSUMER'       and  upper(slob.line_of_bsns_d
+s) = 'MOBILE POSTPAID'       and  upper(s.main_prod_offr_clss_ds
+) in ('MOBILE')       and  upper(c.frst_nm) not like 'BRT%'
+and  upper(bo.bill_offr_ds) not in ('MOBILE PHONE INSTANT CARD
+(CATEGORY E)','MOBILE PHONE INSTANT CARD(DATA SIM)','HOTEL MOBIL
+E EXTENSION SERVICE PLAN SUBSCRIPTION','HOTEL MOBILE SOLUTION MO
+NTHLY SUBSCRIPTION','DATA PRICE PLAN (HOTEL)','GSM SIM CARD RENT
+AL','PORT-OUT SUBSCRIPTION')       and  ( upper(s.subs_ctgy_id)
+not in ('CIS','CIS_IDD') or s.subs_ctgy_id is null )       and o
+a.ord_actn_strt_date_key BETWEEN 20190101 and (select end_date f
+rom broadband_oed)       )

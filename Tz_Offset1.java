@@ -17,16 +17,14 @@ import com.denodo.common.custom.elements.CustomElementsUtil;
 import com.denodo.common.custom.elements.QueryContext;
 import java.lang.*;
 
-@CustomElement(type = CustomElementType.VDPAGGREGATEFUNCTION, name = "COLLECT")
-public class Collect {
+@CustomElement(type = CustomElementType.VDPFUNCTION, name = "TZ_OFFSET")
+public class Tz_Offset1 {
      @CustomExecutor(implementation = true, delegationPatterns = {
             @DelegationPattern(databaseName = "oracle",
-                                databaseVersions = { "10g", "11g" },
-                                pattern = "CAST(COLLECT($0[,$i]{1,n}) as $1)") })
-     public Double collect(
-			@CustomGroup(name = "field2", groupType = String.class)
-            CustomGroupValue<String>... textField, 
-             @CustomParam(name = "arg0") String arg0) {
+                                databaseVersions = { "10g", "11g", "9i", "12c" },
+                                pattern = "TZ_OFFSET($0)") })
+     public Timestamp Tz_Offset1 (
+             @CustomParam(name = "arg0") Timestamp arg0) {
 
          /*
          * If the function is not delegated to any of the databases above (e.g. if you use it on a query to
